@@ -11,7 +11,11 @@ import UIKit
 class RatingControl: UIView {
     
     //MARK: Properties
-    var rating = 0
+    var rating = 0{
+        didSet {
+            setNeedsLayout()
+        }
+    }
     var ratingButtons = [UIButton]()
     
     let spacing=5
@@ -28,15 +32,21 @@ class RatingControl: UIView {
             buttonFrame.origin.x = CGFloat(index*(buttonSize+spacing))
             button.frame = buttonFrame
         }
+        updateButtonSelectionStates()
     }
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
+        let emptyStarImage = UIImage(named: "emptyStar")
+        let filledStarImage = UIImage(named: "filledStar")
         
         for _ in 0..<starCount
         {
             let button = UIButton()
-            button.backgroundColor = UIColor.redColor()
+            button.setImage(emptyStarImage, forState: .Normal)
+            button.setImage(filledStarImage, forState: .Selected)
+            button.setImage(filledStarImage, forState: [.Highlighted,.Selected])
+            button.adjustsImageWhenHighlighted = false
             
             button.addTarget(self, action: #selector(RatingControl.ratingButtonTapped(_:)), forControlEvents: .TouchDown)
             ratingButtons += [button]
@@ -54,6 +64,15 @@ class RatingControl: UIView {
     
     func ratingButtonTapped(button: UIButton)
     {
-        print("button pressed")
+        rating = ratingButtons.indexOf(button)!+1
+        updateButtonSelectionStates()
+    }
+    
+    func updateButtonSelectionStates()
+    {
+        for (index,button) in ratingButtons.enumerate()
+        {
+            button.selected = index < rating
+        }
     }
 }
